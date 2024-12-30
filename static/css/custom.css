@@ -1,0 +1,197 @@
+.contact-card {
+    transition: transform 0.2s;
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+    position: relative;
+}
+
+.contact-card:hover {
+    transform: translateY(-5px);
+}
+
+.profile-photo {
+    width: 200px;  /* Tamaño fijo cuadrado */
+    height: 200px;
+    object-fit: cover;
+    border-radius: 50%;
+    border: 6px solid var(--bs-primary);
+    margin: 0 auto 1.5rem;
+    cursor: pointer;
+    display: block;
+    object-position: center;  /* Centrar la imagen */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.profile-photo:hover {
+    border-color: var(--bs-info);
+    transform: scale(1.05);
+    transition: all 0.3s ease;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+}
+
+.audio-controls {
+    width: 100%;
+    margin-top: 1.5rem;
+    height: 50px;
+}
+
+.contact-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 2rem;
+    padding: 2rem;
+}
+
+/* Mejoras de accesibilidad */
+.btn {
+    font-size: 1.3rem;
+    padding: 1rem 2rem;
+    margin: 0.5rem 0;
+}
+
+.form-control {
+    font-size: 1.3rem;
+    padding: 1rem;
+    margin-bottom: 1rem;
+}
+
+.form-label {
+    font-size: 1.4rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+
+.card-title {
+    font-size: 2rem;
+    margin-bottom: 1.5rem;
+}
+
+.phone-link {
+    font-size: 1.5rem;
+    display: block;
+    margin: 1.5rem 0;
+    padding: 1rem;
+    background-color: var(--bs-dark);
+    border-radius: 0.5rem;
+}
+
+.play-message {
+    font-size: 1.4rem;
+    padding: 1.5rem;
+    width: 100%;
+    margin-top: 1.5rem;
+}
+
+.alert {
+    font-size: 1.4rem;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+/* Simplificar la navegación */
+.navbar-brand {
+    font-size: 2rem;
+}
+
+.nav-link {
+    font-size: 1.5rem !important;
+    padding: 1rem 1.5rem !important;
+}
+
+/* Display headings */
+.display-4 {
+    font-size: 2.5rem !important;
+    font-weight: 600 !important;
+}
+
+.display-6 {
+    font-size: 2rem !important;
+    font-weight: 600 !important;
+}
+
+/* Estilos del botón de eliminar */
+.delete-form {
+    position: absolute;
+    bottom: 10px;
+    left: 10px;
+    z-index: 10;
+}
+
+.delete-btn {
+    font-size: 1rem !important;
+    padding: 0.5rem !important;
+    opacity: 0.6;
+    transition: opacity 0.3s ease;
+}
+
+.delete-btn:hover {
+    opacity: 1;
+}
+
+/* Insignia de contacto de emergencia */
+.emergency-badge {
+    background-color: var(--bs-danger);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    margin-top: 1rem;
+    font-size: 1.2rem;
+}
+
+.emergency-badge small {
+    font-size: 1rem;
+    opacity: 0.8;
+}
+
+/* Emergency button styles */
+.btn-emergency {
+    font-size: 1.5rem !important;  /* Reducido de 2rem para mejor ajuste en móvil */
+    padding: 1rem 1.5rem !important;  /* Reducido el padding */
+    border-radius: 0.75rem;  /* Reducido de 1rem */
+    box-shadow: 0 4px 8px rgba(255, 0, 0, 0.2);
+    transition: all 0.3s ease;
+    width: 100%;
+    max-width: 400px;  /* Reducido de 600px para mejor ajuste */
+    white-space: normal;  /* Permite que el texto se ajuste en múltiples líneas */
+    text-align: center;
+    margin: 0.5rem auto;  /* Reducido el margen */
+}
+
+.btn-emergency:hover {
+    transform: scale(1.02);  /* Reducido de 1.05 para evitar desbordamiento */
+    box-shadow: 0 6px 12px rgba(255, 0, 0, 0.3);
+}
+
+.emergency-info {
+    font-size: 1.1rem;  /* Reducido de 1.5rem */
+    color: white;  /* Cambiado a blanco para mejor visibilidad */
+    margin-top: 0.5rem;  /* Reducido el margen */
+    text-align: center;
+}
+
+.emergency-section {
+    padding: 1rem;  /* Reducido de 2rem */
+    border: 2px solid var(--bs-danger);  /* Reducido el borde */
+    border-radius: 0.75rem;
+    background-color: rgba(255, 0, 0, 0.1);
+    margin: 1rem auto;
+    max-width: 100%;  /* Asegura que no se desborde */
+}
+
+/* Media queries para dispositivos móviles */
+@media (max-width: 576px) {
+    .btn-emergency {
+        font-size: 1.2rem !important;
+        padding: 0.75rem 1rem !important;
+        max-width: 100%;
+    }
+
+    .emergency-info {
+        font-size: 1rem;
+    }
+
+    .emergency-section {
+        padding: 0.5rem;
+        margin: 0.5rem auto;
+    }
+}
