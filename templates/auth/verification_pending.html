@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h2 class="card-title mb-4">Verificación de Cuenta Pendiente</h2>
+                    
+                    {% if current_user.is_visually_impaired and not current_user.disability_verified %}
+                    <div class="alert alert-info">
+                        <h4 class="alert-heading">Verificación de Discapacidad Visual en Proceso</h4>
+                        <p>Estamos revisando tu documentación. Este proceso puede tomar entre 24-72 horas.</p>
+                        <p>Te notificaremos por teléfono y correo electrónico cuando la verificación esté completa.</p>
+                    </div>
+                    {% else %}
+                    <div class="alert alert-info">
+                        <h4 class="alert-heading">Verifica tu Correo Electrónico</h4>
+                        <p>Hemos enviado un enlace de verificación a tu correo electrónico.</p>
+                        <p>Por favor, revisa tu bandeja de entrada y sigue las instrucciones para activar tu cuenta.</p>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <p>¿No has recibido el correo de verificación?</p>
+                        <a href="{{ url_for('resend_verification') }}" class="btn btn-primary">
+                            Reenviar Correo de Verificación
+                        </a>
+                    </div>
+                    {% endif %}
+                    
+                    <div class="mt-4">
+                        <a href="{{ url_for('logout') }}" class="btn btn-outline-secondary">
+                            Cerrar Sesión
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

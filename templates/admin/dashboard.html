@@ -1,0 +1,225 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <h1 class="display-4 mb-4" role="heading" aria-level="1">Panel de Administración</h1>
+
+    <!-- Verificaciones Pendientes -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <h2 class="card-title h4 mb-4">Verificaciones Pendientes de Discapacidad Visual</h2>
+            <div class="table-responsive">
+                <table class="table table-hover" role="table">
+                    <thead>
+                        <tr>
+                            <th scope="col">Nombre</th>
+                            <th scope="col">Email</th>
+                            <th scope="col">Teléfono</th>
+                            <th scope="col">DNI</th>
+                            <th scope="col">Documento</th>
+                            <th scope="col">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user in users_with_visual_impairment %}
+                        {% if not user.disability_verified and user.disability_document_path %}
+                        <tr>
+                            <td>{{ user.name }}</td>
+                            <td>{{ user.email }}</td>
+                            <td>{{ user.phone }}</td>
+                            <td>{{ user.dni }}</td>
+                            <td>
+                                <a href="{{ url_for('static', filename=user.disability_document_path) }}" 
+                                   target="_blank" class="btn btn-sm btn-outline-info">
+                                    Ver Documento
+                                </a>
+                            </td>
+                            <td>
+                                <form action="{{ url_for('admin_verify_disability', user_id=user.id) }}" 
+                                      method="POST" class="d-inline">
+                                    <button type="submit" class="btn btn-sm btn-success"
+                                            aria-label="Verificar usuario {{ user.name }}">
+                                        <i class="bi bi-check-circle"></i> Aprobar
+                                    </button>
+                                </form>
+                                <button type="button" 
+                                        class="btn btn-sm btn-outline-primary" 
+                                        data-bs-toggle="modal" 
+                                        data-bs-target="#noteModal{{ user.id }}"
+                                        aria-label="Añadir nota para {{ user.name }}">
+                                    <i class="bi bi-pencil"></i> Nota
+                                </button>
+                            </td>
+                        </tr>
+                        {% endif %}
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Usuarios con Discapacidad Visual -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <h2 class="card-title h4 mb-4">Usuarios con Discapacidad Visual (Acceso Gratuito)</h2>
+            <div class="table-responsive">
+                <table class="table table-hover" role="table">
+                    <thead>
+                        <tr>
+                            <th scope="col">Nombre</th>
+                            <th scope="col">Email</th>
+                            <th scope="col">Teléfono</th>
+                            <th scope="col">Estado</th>
+                            <th scope="col">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user in users_with_visual_impairment %}
+                        {% if user.disability_verified %}
+                        <tr>
+                            <td>{{ user.name }}</td>
+                            <td>{{ user.email }}</td>
+                            <td>{{ user.phone }}</td>
+                            <td>
+                                {% if user.email_verified %}
+                                    <span class="badge bg-success">Verificado</span>
+                                {% else %}
+                                    <span class="badge bg-warning">Pendiente</span>
+                                {% endif %}
+                                <span class="badge bg-info">Acceso Gratuito</span>
+                            </td>
+                            <td>
+                                <div class="btn-group" role="group" aria-label="Acciones de usuario">
+                                    <button type="button" 
+                                            class="btn btn-sm btn-outline-primary" 
+                                            data-bs-toggle="modal" 
+                                            data-bs-target="#userModal{{ user.id }}"
+                                            aria-label="Editar usuario {{ user.name }}">
+                                        <i class="bi bi-pencil"></i>
+                                    </button>
+                                    {% if not user.is_admin %}
+                                    <form action="{{ url_for('admin_delete_user', user_id=user.id) }}" 
+                                          method="POST" 
+                                          class="d-inline"
+                                          onsubmit="return confirm('¿Está seguro de eliminar este usuario?');">
+                                        <button type="submit" 
+                                                class="btn btn-sm btn-outline-danger"
+                                                aria-label="Eliminar usuario {{ user.name }}">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                        {% include 'admin/_user_modal.html' %}
+                        {% endif %}
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Usuarios Regulares -->
+    <div class="card">
+        <div class="card-body">
+            <h2 class="card-title h4 mb-4">Usuarios Regulares (Suscripción: 1€/mes)</h2>
+            <div class="table-responsive">
+                <table class="table table-hover" role="table">
+                    <thead>
+                        <tr>
+                            <th scope="col">Nombre</th>
+                            <th scope="col">Email</th>
+                            <th scope="col">Estado</th>
+                            <th scope="col">Suscripción</th>
+                            <th scope="col">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user in regular_users %}
+                        <tr>
+                            <td>{{ user.name }}</td>
+                            <td>{{ user.email }}</td>
+                            <td>
+                                {% if user.email_verified %}
+                                    <span class="badge bg-success">Verificado</span>
+                                {% else %}
+                                    <span class="badge bg-warning">Pendiente</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if user.is_subscribed %}
+                                    <span class="badge bg-success">Activa hasta {{ user.subscription_end.strftime('%d/%m/%Y') }}</span>
+                                {% else %}
+                                    <span class="badge bg-danger">Inactiva</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="btn-group" role="group" aria-label="Acciones de usuario">
+                                    <button type="button" 
+                                            class="btn btn-sm btn-outline-primary" 
+                                            data-bs-toggle="modal" 
+                                            data-bs-target="#userModal{{ user.id }}"
+                                            aria-label="Editar usuario {{ user.name }}">
+                                        <i class="bi bi-pencil"></i>
+                                    </button>
+                                    {% if not user.is_admin %}
+                                    <form action="{{ url_for('admin_delete_user', user_id=user.id) }}" 
+                                          method="POST" 
+                                          class="d-inline"
+                                          onsubmit="return confirm('¿Está seguro de eliminar este usuario?');">
+                                        <button type="submit" 
+                                                class="btn btn-sm btn-outline-danger"
+                                                aria-label="Eliminar usuario {{ user.name }}">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                        {% include 'admin/_user_modal.html' %}
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para Notas de Verificación -->
+{% for user in users_with_visual_impairment %}
+{% if not user.disability_verified and user.disability_document_path %}
+<div class="modal fade" id="noteModal{{ user.id }}" tabindex="-1" aria-labelledby="noteModalLabel{{ user.id }}" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="noteModalLabel{{ user.id }}">
+                    Añadir Nota - {{ user.name }}
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <form action="{{ url_for('admin_add_verification_note', user_id=user.id) }}" method="POST">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="note{{ user.id }}" class="form-label">Nota de Verificación</label>
+                        <textarea class="form-control" 
+                                 id="note{{ user.id }}" 
+                                 name="note" 
+                                 rows="3"
+                                 required></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Guardar Nota</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endfor %}
+{% endblock %}

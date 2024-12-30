@@ -1,0 +1,105 @@
+<!-- Modal para editar usuario -->
+<div class="modal fade" 
+     id="userModal{{ user.id }}" 
+     tabindex="-1" 
+     aria-labelledby="userModalLabel{{ user.id }}" 
+     aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="userModalLabel{{ user.id }}">
+                    Editar Usuario: {{ user.name }}
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <form action="{{ url_for('admin_edit_user', user_id=user.id) }}" method="POST">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="name{{ user.id }}" class="form-label">Nombre</label>
+                        <input type="text" 
+                               class="form-control" 
+                               id="name{{ user.id }}" 
+                               name="name" 
+                               value="{{ user.name }}" 
+                               required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="email{{ user.id }}" class="form-label">Email</label>
+                        <input type="email" 
+                               class="form-control" 
+                               id="email{{ user.id }}" 
+                               value="{{ user.email }}" 
+                               readonly>
+                    </div>
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" 
+                                   type="checkbox" 
+                                   id="isVisuallyImpaired{{ user.id }}" 
+                                   name="is_visually_impaired" 
+                                   {% if user.is_visually_impaired %}checked{% endif %}>
+                            <label class="form-check-label" for="isVisuallyImpaired{{ user.id }}">
+                                Usuario con Discapacidad Visual (Acceso Gratuito)
+                            </label>
+                        </div>
+                        {% if user.is_visually_impaired %}
+                        <div class="mt-2">
+                            <div class="form-check">
+                                <input class="form-check-input" 
+                                       type="checkbox" 
+                                       id="disabilityVerified{{ user.id }}" 
+                                       name="disability_verified" 
+                                       {% if user.disability_verified %}checked{% endif %}>
+                                <label class="form-check-label" for="disabilityVerified{{ user.id }}">
+                                    Discapacidad Visual Verificada
+                                </label>
+                            </div>
+                            {% if user.disability_document_path %}
+                            <div class="mt-2">
+                                <a href="{{ url_for('static', filename=user.disability_document_path) }}" 
+                                   target="_blank" 
+                                   class="btn btn-sm btn-outline-info">
+                                    Ver Documento Acreditativo
+                                </a>
+                            </div>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% if not user.is_visually_impaired %}
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" 
+                                   type="checkbox" 
+                                   id="isSubscribed{{ user.id }}" 
+                                   name="is_subscribed" 
+                                   {% if user.is_subscribed %}checked{% endif %}>
+                            <label class="form-check-label" for="isSubscribed{{ user.id }}">
+                                Suscripción Activa (1€/mes)
+                            </label>
+                        </div>
+                        {% if user.is_subscribed and user.subscription_end %}
+                        <small class="text-muted">
+                            Suscripción válida hasta: {{ user.subscription_end.strftime('%d/%m/%Y') }}
+                        </small>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                    {% if user.verification_notes %}
+                    <div class="mb-3">
+                        <label class="form-label">Notas de Verificación</label>
+                        <p class="form-text">{{ user.verification_notes }}</p>
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="modal-footer">
+                    <button type="button" 
+                            class="btn btn-secondary" 
+                            data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" 
+                            class="btn btn-primary">Guardar Cambios</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

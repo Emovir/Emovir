@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h1 class="display-6 mb-4">Acceso a la Plataforma</h1>
+
+                    <!-- Botón de contacto directo - visible para todos -->
+                    <div class="alert alert-info mb-4" role="alert">
+                        <h4 class="alert-heading">¿Necesitas ayuda con el registro?</h4>
+                        <p>Para acelerar el proceso, contáctanos directamente:</p>
+                        <a href="tel:+34613273847" class="btn btn-primary btn-lg mb-2">
+                            <i class="bi bi-telephone-fill"></i> Llamar ahora
+                        </a>
+                        <p class="small mb-0">Teléfono: +34 613 273 847</p>
+                    </div>
+
+                    {% if current_user.is_visually_impaired %}
+                        {% if current_user.disability_verified %}
+                            <div class="alert alert-success" role="alert">
+                                <h4 class="alert-heading">¡Acceso Gratuito Activado!</h4>
+                                <p>Tu condición de discapacidad visual ha sido verificada. Tienes acceso completo a todas las funciones sin costo.</p>
+                                <a href="{{ url_for('contacts') }}" class="btn btn-success btn-lg mt-3">
+                                    Acceder a la Plataforma
+                                </a>
+                            </div>
+                        {% else %}
+                            <div class="alert alert-info" role="alert">
+                                <h4 class="alert-heading">Verificación Pendiente</h4>
+                                <p>Tu documento de discapacidad visual está siendo revisado. Te notificaremos cuando sea verificado.</p>
+                                {% if not current_user.disability_document_path %}
+                                    <hr>
+                                    <form method="POST" enctype="multipart/form-data" action="{{ url_for('upload_disability_document') }}" class="text-start">
+                                        <div class="mb-3">
+                                            <label for="disability_document" class="form-label">
+                                                Subir Documento de Discapacidad Visual
+                                            </label>
+                                            <input type="file" class="form-control form-control-lg" 
+                                                   id="disability_document" name="disability_document" required
+                                                   accept=".pdf,.jpg,.jpeg,.png"
+                                                   aria-describedby="documentHelp">
+                                            <div id="documentHelp" class="form-text">
+                                                Acepta documentos PDF o imágenes (jpg, png). Máximo 5MB.
+                                            </div>
+                                        </div>
+                                        <button type="submit" class="btn btn-primary btn-lg">
+                                            Subir Documento
+                                        </button>
+                                    </form>
+                                {% endif %}
+                            </div>
+                        {% endif %}
+                    {% else %}
+                        {% if current_user.has_active_subscription() %}
+                            <div class="alert alert-success" role="alert">
+                                <h4 class="alert-heading">¡Suscripción Activa!</h4>
+                                <p>Tu suscripción está activa hasta: {{ current_user.subscription_end.strftime('%d/%m/%Y') }}</p>
+                                <a href="{{ url_for('contacts') }}" class="btn btn-success btn-lg mt-3">
+                                    Acceder a la Plataforma
+                                </a>
+                            </div>
+                        {% else %}
+                            <div class="card mb-4">
+                                <div class="card-body">
+                                    <h3 class="card-title">Plan Mensual</h3>
+                                    <p class="display-4 my-4">1€/mes</p>
+                                    <ul class="list-unstyled mb-4">
+                                        <li>✓ Acceso a todas las funciones</li>
+                                        <li>✓ Contactos ilimitados</li>
+                                        <li>✓ Mensajes de voz personalizados</li>
+                                        <li>✓ Botón de emergencia</li>
+                                        <li>✓ Soporte prioritario</li>
+                                    </ul>
+                                    <div id="paypal-button-container"></div>
+                                </div>
+                            </div>
+
+                            <!-- Opción para usuarios con discapacidad visual -->
+                            <div class="alert alert-info" role="alert">
+                                <h4 class="alert-heading">¿Tienes una discapacidad visual?</h4>
+                                <p>Los usuarios con discapacidad visual verificada tienen acceso gratuito.</p>
+                                <a href="{{ url_for('register') }}?type=visually_impaired" 
+                                   class="btn btn-outline-primary">
+                                    Registrarse como usuario con discapacidad visual
+                                </a>
+                            </div>
+                        {% endif %}
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

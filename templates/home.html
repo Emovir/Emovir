@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="px-4 py-5 my-5 text-center">
+    {% if current_user.is_authenticated %}
+        <div class="emergency-section mb-5" role="region" aria-label="Sección de emergencia">
+            <a href="tel:112" id="emergencyButton" 
+               class="btn btn-danger btn-emergency mb-3" 
+               aria-label="Botón de emergencia. Al presionar, llamará primero al 112 y luego a tus contactos de emergencia según su prioridad."
+               role="button">
+                <i class="bi bi-telephone-fill" aria-hidden="true"></i> 
+                LLAMADA DE EMERGENCIA
+            </a>
+            <p class="emergency-info" role="alert">
+                Al presionar, iniciará una secuencia de llamadas: primero al 112 y luego a tus contactos de emergencia según su prioridad configurada. 
+                Entre cada llamada habrá una pausa de 30 segundos.
+            </p>
+        </div>
+    {% endif %}
+
+    <h1 class="display-5 fw-bold" role="heading" aria-level="1">Bienvenido al Gestor de Contactos</h1>
+    <div class="col-lg-6 mx-auto">
+        <p class="lead mb-4" role="text">
+            Gestiona tus contactos, graba mensajes de voz y realiza llamadas directamente desde nuestra plataforma accesible.
+        </p>
+        <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
+            {% if not current_user.is_authenticated %}
+                <a href="{{ url_for('login') }}" class="btn btn-primary btn-lg px-4 gap-3" role="button">Iniciar Sesión</a>
+                <a href="{{ url_for('register') }}" class="btn btn-outline-secondary btn-lg px-4" role="button">Registrarse</a>
+            {% else %}
+                <a href="{{ url_for('contacts') }}" class="btn btn-primary btn-lg px-4 gap-3" role="button">Ver Contactos</a>
+                <a href="{{ url_for('add_contact') }}" class="btn btn-outline-secondary btn-lg px-4" role="button">Añadir Contacto</a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const emergencyButton = document.getElementById('emergencyButton');
+    let isEmergencyInProgress = false;
+
+    if (emergencyButton) {
+        emergencyButton.addEventListener('click', async function(e) {
+            // Solo prevenir el comportamiento por defecto si necesitamos confirmar
+            if (!confirm('ATENCIÓN: ¿Está seguro de que necesita ayuda de emergencia? Al confirmar, se iniciará una llamada al 112 inmediatamente.')) {
+                e.preventDefault();
+                return;
+            }
+
+            if (isEmergencyInProgress) {
+                e.preventDefault();
+                const synth = window.speechSynthesis;
+                const inProgressMsg = new SpeechSynthesisUtterance(
+                    'Ya hay una secuencia de llamadas de emergencia en progreso. Por favor, espere.'
+                );
+                synth.speak(inProgressMsg);
+                return;
+            }
+
+            isEmergencyInProgress = true;
+
+            // Anunciar inicio de llamada
+            const synth = window.speechSynthesis;
+            const announcement = new SpeechSynthesisUtterance('Iniciando llamada al 112.');
+            synth.speak(announcement);
+
+            // La llamada al 112 procederá naturalmente a través del href del enlace
+
+            // Obtener y programar las llamadas a contactos de emergencia
+            try {
+                const response = await fetch('/emergency_contacts');
+                if (!response.ok) throw new Error('Error al obtener contactos de emergencia');
+
+                const contacts = await response.json();
+
+                // Programar las llamadas a contactos después de 30 segundos
+                setTimeout(async () => {
+                    if (contacts && contacts.length > 0) {
+                        for (const contact of contacts) {
+                            await new Promise(resolve => setTimeout(resolve, 30000));
+                            window.location.href = `tel:${contact.phone}`;
+                        }
+                    }
+                    isEmergencyInProgress = false;
+                }, 30000);
+            } catch (error) {
+                console.error('Error:', error);
+                isEmergencyInProgress = false;
+            }
+        });
+    }
+});
+</script>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.btn-emergency {
+    font-size: 2rem !important;
+    padding: 2rem 4rem !important;
+    border-radius: 1rem;
+    box-shadow: 0 4px 8px rgba(255, 0, 0, 0.2);
+    transition: all 0.3s ease;
+    width: 100%;
+    max-width: 600px;
+}
+
+.btn-emergency:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 12px rgba(255, 0, 0, 0.3);
+}
+
+.emergency-info {
+    font-size: 1.5rem;
+    color: var(--bs-danger);
+    margin-top: 1rem;
+}
+
+.emergency-section {
+    padding: 2rem;
+    border: 3px solid var(--bs-danger);
+    border-radius: 1rem;
+    background-color: rgba(255, 0, 0, 0.1);
+    margin: 2rem auto;
+    max-width: 800px;
+}
+</style>
+{% endblock %}

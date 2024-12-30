@@ -1,0 +1,145 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="display-4" role="heading" aria-level="1">Mis Contactos</h1>
+    <a href="{{ url_for('add_contact') }}" class="btn btn-primary btn-lg" role="button"
+       aria-label="Añadir nuevo contacto">
+        <i class="bi bi-person-plus"></i> Añadir Contacto
+    </a>
+</div>
+
+<div class="contact-list" role="list" aria-label="Lista de contactos">
+    {% for contact in contacts %}
+    <div class="card contact-card" role="listitem">
+        <div class="card-body text-center position-relative">
+            {% if contact.photo_path %}
+                <img src="{{ url_for('static', filename=contact.photo_path) }}" 
+                     alt="Foto de {{ contact.name }}" 
+                     class="profile-photo mb-3 play-message rounded-circle"
+                     data-contact-id="{{ contact.id }}"
+                     role="button"
+                     aria-label="Foto de {{ contact.name }}. Toca para reproducir mensaje de voz.">
+            {% else %}
+                <img src="https://images.unsplash.com/photo-1526313199968-70e399ffe791" 
+                     alt="Foto de perfil por defecto de {{ contact.name }}" 
+                     class="profile-photo mb-3 play-message rounded-circle"
+                     data-contact-id="{{ contact.id }}"
+                     role="button"
+                     aria-label="Foto predeterminada de {{ contact.name }}. Toca para reproducir mensaje de voz.">
+            {% endif %}
+            <h2 class="card-title h3 mb-4" role="heading" aria-level="2">{{ contact.name }}</h2>
+
+            <div class="d-grid gap-3">
+                <a href="#" class="btn btn-primary btn-lg phone-link" 
+                   data-phone="{{ contact.phone }}"
+                   role="button"
+                   aria-label="Llamar a {{ contact.name }} al número {{ contact.phone }}">
+                    <i class="bi bi-telephone"></i> Llamar
+                </a>
+
+                {% if contact.is_emergency_contact %}
+                <div class="emergency-badge" role="status" 
+                     aria-label="Contacto de emergencia con prioridad {{ contact.emergency_priority }}">
+                    <i class="bi bi-star-fill"></i> Contacto de Emergencia
+                    <br>
+                    <small>Prioridad: {{ contact.emergency_priority }}</small>
+                </div>
+                {% endif %}
+            </div>
+
+            <form action="{{ url_for('delete_contact', contact_id=contact.id) }}" 
+                  method="POST" 
+                  onsubmit="return confirm('¿Está completamente seguro de que desea eliminar el contacto {{ contact.name }}? Esta acción no se puede deshacer.');"
+                  class="delete-form position-absolute">
+                <button type="submit" 
+                        class="btn btn-outline-danger btn-sm delete-btn"
+                        aria-label="Eliminar contacto {{ contact.name }}">
+                    <i class="bi bi-trash"></i>
+                </button>
+            </form>
+
+            <audio id="audio-{{ contact.id }}" class="audio-controls" aria-label="Mensaje de voz de {{ contact.name }}">
+                {% if contact.voice_path %}
+                    <source src="{{ url_for('static', filename=contact.voice_path) }}" type="audio/mpeg">
+                {% else %}
+                    <source src="{{ url_for('static', filename='uploads/message_' ~ contact.id ~ '.mp3') }}" type="audio/mpeg">
+                {% endif %}
+                Tu navegador no soporta la reproducción de audio.
+            </audio>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+{% if not contacts %}
+<div class="text-center mt-5" role="alert">
+    <p class="display-6">Aún no tienes contactos. ¡Añade tu primer contacto!</p>
+    <a href="{{ url_for('add_contact') }}" class="btn btn-primary btn-lg mt-3"
+       role="button" aria-label="Añadir tu primer contacto">
+        <i class="bi bi-person-plus"></i> Añadir Contacto
+    </a>
+</div>
+{% endif %}
+
+<style>
+.profile-photo {
+    width: 250px;  /* Aumentado significativamente para mejor visibilidad */
+    height: 250px;
+    object-fit: cover;
+    border: 4px solid var(--bs-primary);
+    margin: 0 auto;
+    display: block;
+    cursor: pointer;
+}
+
+.contact-card {
+    margin-bottom: 2rem;
+    position: relative;
+    padding: 1.5rem;
+}
+
+.emergency-badge {
+    color: white;  /* Cambiado de var(--bs-danger) a white */
+    border: 2px solid var(--bs-danger);
+    border-radius: 0.5rem;
+    padding: 1rem;
+    margin-top: 1rem;
+    font-size: 1.2rem;
+    background-color: var(--bs-danger);  /* Cambiado de rgba(255, 0, 0, 0.1) a var(--bs-danger) */
+    text-align: center;
+    font-weight: bold;
+}
+
+.emergency-badge small {
+    display: block;
+    margin-top: 0.5rem;
+    font-size: 1rem;
+    color: white;  /* Asegurando que el texto pequeño también sea blanco */
+}
+
+.delete-form {
+    position: absolute;
+    bottom: 1rem;
+    left: 1rem;
+    z-index: 10;
+}
+
+.delete-btn {
+    opacity: 1;  /* Cambiado a 1 para hacerlo completamente visible */
+    background-color: rgba(255, 255, 255, 0.9);  /* Fondo semi-transparente para mejor visibilidad */
+    padding: 0.5rem;  /* Más padding para hacer el botón más grande */
+    border: 2px solid var(--bs-danger);  /* Borde más visible */
+}
+
+.delete-btn:hover {
+    background-color: var(--bs-danger);
+    color: white;
+}
+
+.card-title {
+    font-size: 2rem;
+    margin-top: 1rem;
+}
+</style>
+{% endblock %}

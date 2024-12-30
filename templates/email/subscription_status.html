@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Estado de Suscripción</title>
+</head>
+<body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+    <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
+        <h2 style="color: #2c3e50;">Actualización de Estado de Suscripción</h2>
+        <p>Hola {{ user.name }},</p>
+        
+        {% if is_active %}
+        <div style="background-color: #dff0d8; padding: 15px; border-radius: 5px; margin: 20px 0;">
+            <h4 style="color: #3c763d; margin-top: 0;">¡Suscripción Activada!</h4>
+            <p>Tu suscripción ha sido activada exitosamente.</p>
+            <p>Ahora tienes acceso completo a todas las funcionalidades de la plataforma.</p>
+            {% if user.subscription_end %}
+            <p>Tu suscripción es válida hasta: {{ user.subscription_end.strftime('%d/%m/%Y') }}</p>
+            {% endif %}
+        </div>
+        {% else %}
+        <div style="background-color: #f2dede; padding: 15px; border-radius: 5px; margin: 20px 0;">
+            <h4 style="color: #a94442; margin-top: 0;">Suscripción Cancelada</h4>
+            <p>Tu suscripción ha sido cancelada.</p>
+            <p>Si deseas renovar tu acceso, puedes hacerlo en cualquier momento desde tu panel de usuario.</p>
+        </div>
+        {% endif %}
+
+        <div style="margin-top: 20px;">
+            <p>Si tienes alguna pregunta sobre tu suscripción o necesitas ayuda, no dudes en contactarnos.</p>
+        </div>
+
+        <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;">
+        <p style="color: #7f8c8d; font-size: 0.9em;">
+            Este es un correo automático, por favor no respondas a este mensaje.
+        </p>
+    </div>
+</body>
+</html>

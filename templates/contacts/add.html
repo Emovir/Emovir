@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-body">
+                <h2 class="card-title text-center mb-4" role="heading" aria-level="1">Añadir Nuevo Contacto</h2>
+                <form method="POST" enctype="multipart/form-data">
+                    {{ form.hidden_tag() }}
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Nombre</label>
+                        {{ form.name(class="form-control", aria_label="Nombre del contacto") }}
+                        {% for error in form.name.errors %}
+                            <span class="text-danger" role="alert">{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                    <div class="mb-3">
+                        <label for="phone" class="form-label">Número de Teléfono</label>
+                        {{ form.phone(class="form-control", placeholder="+34123456789", aria_label="Número de teléfono en formato internacional") }}
+                        {% for error in form.phone.errors %}
+                            <span class="text-danger" role="alert">{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                    <div class="mb-3">
+                        <label for="photo" class="form-label">Foto del Contacto</label>
+                        {{ form.photo(class="form-control", aria_label="Seleccionar foto del contacto") }}
+                        {% for error in form.photo.errors %}
+                            <span class="text-danger" role="alert">{{ error }}</span>
+                        {% endfor %}
+                        <small class="text-muted" role="note">Sube una foto de tu ser querido (jpg, png, jpeg). Se recomienda una foto donde se vea bien el rostro.</small>
+                    </div>
+                    <div class="mb-3">
+                        <label for="message" class="form-label">Texto del Mensaje de Voz</label>
+                        {{ form.message(class="form-control", rows=3, aria_label="Texto que será convertido a mensaje de voz") }}
+                        {% for error in form.message.errors %}
+                            <span class="text-danger" role="alert">{{ error }}</span>
+                        {% endfor %}
+                        <small class="text-muted" role="note">Este texto será convertido a mensaje de voz si no subes un archivo de audio</small>
+                    </div>
+                    <div class="mb-3">
+                        <label for="voice_file" class="form-label">Archivo de Voz Personalizado</label>
+                        {{ form.voice_file(class="form-control", aria_label="Subir archivo de voz personalizado") }}
+                        {% for error in form.voice_file.errors %}
+                            <span class="text-danger" role="alert">{{ error }}</span>
+                        {% endfor %}
+                        <small class="text-muted" role="note">O sube directamente un mensaje de voz en formato MP3</small>
+                    </div>
+                    <div class="mb-3 form-check">
+                        {{ form.is_emergency_contact(class="form-check-input", id="is_emergency_contact", 
+                           aria_label="Marcar como contacto de emergencia", 
+                           role="switch") }}
+                        <label class="form-check-label" for="is_emergency_contact" role="tooltip">
+                            Marcar como Contacto de Emergencia
+                            <i class="bi bi-info-circle ms-1" data-bs-toggle="tooltip" 
+                               title="Los contactos de emergencia serán llamados automáticamente después del 112 en caso de emergencia"></i>
+                        </label>
+                    </div>
+                    <div class="mb-3" id="emergency_priority_div" style="display: none;" role="region" aria-label="Opciones de prioridad de emergencia">
+                        <label for="emergency_priority" class="form-label">Prioridad de Emergencia (1-5)</label>
+                        {{ form.emergency_priority(class="form-control", type="number", min="1", max="5",
+                           aria_label="Selecciona la prioridad del contacto de emergencia, 1 es la más alta, 5 la más baja") }}
+                        {% for error in form.emergency_priority.errors %}
+                            <span class="text-danger" role="alert">{{ error }}</span>
+                        {% endfor %}
+                        <small class="text-muted" role="note">1 = Llamar primero, 5 = Llamar al final. El orden de las llamadas será según esta prioridad.</small>
+                    </div>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary" aria-label="Guardar nuevo contacto">Añadir Contacto</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const emergencyCheckbox = document.querySelector('#is_emergency_contact');
+    const priorityDiv = document.querySelector('#emergency_priority_div');
+
+    // Inicializar tooltips de Bootstrap
+    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+    tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl)
+    });
+
+    function togglePriorityField() {
+        if (emergencyCheckbox.checked) {
+            priorityDiv.style.display = 'block';
+            // Anunciar con voz la activación
+            const synth = window.speechSynthesis;
+            const announcement = new SpeechSynthesisUtterance(
+                'Has marcado este contacto como contacto de emergencia. ' +
+                'Por favor, selecciona su prioridad del 1 al 5, donde 1 significa que será llamado primero ' +
+                'y 5 significa que será llamado al final.'
+            );
+            synth.speak(announcement);
+        } else {
+            priorityDiv.style.display = 'none';
+            document.querySelector('#emergency_priority').value = '';
+            // Anunciar con voz la desactivación
+            const synth = window.speechSynthesis;
+            const announcement = new SpeechSynthesisUtterance(
+                'Has desmarcado este contacto como contacto de emergencia.'
+            );
+            synth.speak(announcement);
+        }
+    }
+
+    emergencyCheckbox.addEventListener('change', togglePriorityField);
+    togglePriorityField(); // Estado inicial
+});
+</script>
+{% endblock %}
