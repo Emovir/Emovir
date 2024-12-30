@@ -1,0 +1,61 @@
+Guardar Usuarios en la Base de Datos:
+El Agente IA de Replit ya genera automáticamente una base de datos SQLite si no se configura una externa. Configura la conexión como sigue:
+
+python
+Copiar código
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
+db.create_all()
+Enviar Correo de Verificación:
+Agrega la lógica para enviar un correo al registrar un usuario:
+
+python
+Copiar código
+from itsdangerous import URLSafeTimedSerializer
+
+serializer = URLSafeTimedSerializer(app.config['SECRET_KEY'])
+
+def send_verification_email(user):
+    token = serializer.dumps(user.email, salt='email-confirm-salt')
+    verification_url = f"{request.host_url}verify-email/{token}"
+    msg = Message("Verifica tu Correo Electrónico",
+                  sender=app.config['MAIL_USERNAME'],
+                  recipients=[user.email])
+    msg.body = f"Hola, haz clic en este enlace para verificar tu cuenta: {verification_url}"
+    mail.send(msg)
+Ruta para Verificar el Correo:
+Implementa la ruta que maneja el enlace de verificación:
+
+python
+Copiar código
+@app.route('/verify-email/<token>')
+def verify_email(token):
+    try:
+        email = serializer.loads(token, salt='email-confirm-salt', max_age=3600)
+        user = User.query.filter_by(email=email).first()
+        if user:
+            user.is_verified = True
+            db.session.commit()
+            return "Correo verificado exitosamente. Ahora puedes iniciar sesión."
+        else:
+            return "Usuario no encontrado."
+    except Exception as e:
+        return f"Error al verificar el correo: {str(e)}"
+Actualizar el Proceso de Registro:
+Asegúrate de que el sistema envíe el correo de verificación después de registrar al usuario:
+
+python
+Copiar código
+@app.route('/register', methods=['POST'])
+def register():
+    email = request.form['email']
+    password = generate_password_hash(request.form['password'], method='sha256')
+    user = User(email=email, password=password, is_verified=False)
+
+    db.session.add(user)
+    db.session.commit()
+
+    try:
+        send_verification_email(user)
+        return "¡Registro exitoso! Por favor, verifica tu correo."
+    except Exception as e:
+        return f"Registro exitoso, pero hubo un error al enviar el correo de verificación: {str(e)}"

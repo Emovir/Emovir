@@ -1,0 +1,70 @@
+Pasos para Resolver el Problema del Inicio de Sesión del Administrador
+Verifica los Logs de Errores
+
+Revisa los logs del servidor para identificar mensajes relacionados con el intento de inicio de sesión.
+Si estás utilizando Flask, los errores suelen aparecer en la consola donde estás ejecutando la aplicación.
+Si el problema está relacionado con la base de datos, puede haber errores específicos de SQLAlchemy.
+Revisa el Modelo de Usuario
+
+Asegúrate de que el modelo de administrador esté correctamente definido. Por ejemplo:
+python
+Copiar código
+from flask_sqlalchemy import SQLAlchemy
+db = SQLAlchemy()
+
+class User(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(100), unique=True, nullable=False)
+    email = db.Column(db.String(100), unique=True, nullable=False)
+    password = db.Column(db.String(200), nullable=False)
+    is_admin = db.Column(db.Boolean, default=False)  # Indica si es administrador
+Valida la Lógica de Autenticación
+
+Asegúrate de que el sistema esté verificando correctamente las credenciales del administrador. Por ejemplo:
+python
+Copiar código
+from werkzeug.security import check_password_hash
+
+@app.route('/admin-login', methods=['POST'])
+def admin_login():
+    data = request.form
+    user = User.query.filter_by(email=data['email']).first()
+    if user and user.is_admin and check_password_hash(user.password, data['password']):
+        session['admin_id'] = user.id
+        return redirect('/admin-dashboard')
+    else:
+        return "Inicio de sesión fallido, verifica tus credenciales."
+Comprueba los Datos de la Base de Datos
+
+Verifica que exista un usuario con la bandera is_admin configurada en True. Puedes hacerlo desde la consola de tu base de datos o añadiendo un script temporal:
+python
+Copiar código
+@app.route('/create-admin')
+def create_admin():
+    hashed_password = generate_password_hash("admin123", method='sha256')
+    admin = User(username="admin", email="admin@example.com", password=hashed_password, is_admin=True)
+    db.session.add(admin)
+    db.session.commit()
+    return "Administrador creado."
+Depura los Mensajes de Error
+
+Si el sistema muestra un error genérico, modifícalo para incluir más información (¡sin exponer detalles sensibles!). Por ejemplo:
+python
+Copiar código
+if not user:
+    return "Usuario no encontrado."
+if not check_password_hash(user.password, data['password']):
+    return "Contraseña incorrecta."
+if not user.is_admin:
+    return "Acceso denegado. Este usuario no es administrador."
+Si el Problema Persiste
+Valida la Configuración de Flask-SQLAlchemy
+
+Asegúrate de que la conexión a la base de datos esté funcionando y las tablas estén correctamente sincronizadas.
+Si es necesario, vuelve a ejecutar db.create_all() para asegurarte de que el modelo esté actualizado.
+Verifica los Endpoints
+
+Revisa que la ruta de inicio de sesión esté correctamente configurada en tu archivo principal o blueprint.
+Prueba el Inicio de Sesión de Administrador
+
+Intenta con diferentes credenciales y revisa los logs para identificar en qué paso falla el proces

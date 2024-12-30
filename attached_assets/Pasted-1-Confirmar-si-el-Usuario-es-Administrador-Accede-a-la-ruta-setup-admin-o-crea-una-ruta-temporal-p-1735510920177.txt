@@ -1,0 +1,103 @@
+1. Confirmar si el Usuario es Administrador
+Accede a la ruta /setup_admin o crea una ruta temporal para verificar y actualizar los usuarios existentes en la base de datos. Esto es útil si no tienes acceso al panel de administrador.
+
+Ruta Temporal para Revisar Usuarios
+Crea una ruta que liste todos los usuarios en la base de datos, junto con sus roles:
+
+python
+Copiar código
+@app.route('/list-users')
+def list_users():
+    users = User.query.all()
+    return {
+        user.email: {
+            "is_admin": user.is_admin,
+            "is_verified": user.is_verified
+        } for user in users
+    }
+Accede a esta ruta en tu navegador (por ejemplo, https://<tu-replit-url>/list-users) y verifica:
+
+Si info@emovir.com o globalrealestatebusiness@gmail.com están registrados.
+Si alguna de estas cuentas tiene is_admin=True.
+2. Actualizar el Rol de Administrador
+Si las cuentas no tienen permisos de administrador, usa la ruta /setup_admin o crea una nueva ruta para actualizarlas.
+
+Ruta para Configurar un Administrador
+Puedes usar esta ruta para convertir cualquier usuario en administrador o crear uno nuevo:
+
+python
+Copiar código
+@app.route('/setup_admin', methods=['POST'])
+def setup_admin():
+    email = request.form.get('email')
+    password = request.form.get('password')  # Usa una contraseña que recuerdes
+    user = User.query.filter_by(email=email).first()
+
+    if user:
+        user.is_admin = True
+        user.password = generate_password_hash(password, method='sha256')  # Cambiar la contraseña si es necesario
+        db.session.commit()
+        return f"El usuario {email} ahora es administrador."
+    else:
+        # Crear un nuevo administrador si no existe
+        hashed_password = generate_password_hash(password, method='sha256')
+        admin = User(email=email, password=hashed_password, is_admin=True, is_verified=True)
+        db.session.add(admin)
+        db.session.commit()
+        return f"Administrador {email} creado con éxito."
+Uso:
+Accede a esta ruta desde tu navegador (/setup_admin) y proporciona los datos necesarios a través de un cliente como Postman o desde un formulario:
+Email: info@emovir.com o globalrealestatebusiness@gmail.com
+Contraseña: Una nueva que recuerdes (por ejemplo, admin123).
+3. Probar el Acceso al Panel de Administrador
+Una vez que hayas actualizado o creado un administrador, intenta acceder al panel con los nuevos datos:
+
+Email: info@emovir.com o globalrealestatebusiness@gmail.com
+Contraseña: La que configuraste (por ejemplo, admin123).
+Ruta de Inicio de Sesión del Administrador
+Revisa que la lógica de inicio de sesión esté validando correctamente el rol de administrador:
+
+python
+Copiar código
+@app.route('/admin-login', methods=['POST'])
+def admin_login():
+    email = request.form['email']
+    password = request.form['password']
+    user = User.query.filter_by(email=email).first()
+
+    if user and check_password_hash(user.password, password) and user.is_admin:
+        session['admin_id'] = user.id
+        return redirect('/admin-dashboard')  # Asegúrate de tener esta ruta implementada
+    else:
+        return "Correo o contraseña inválidos, o no tienes permisos de administrador."
+4. Revisar Problemas Adicionales
+Asegurarte de que las Contraseñas Funcionen
+Si las contraseñas almacenadas no coinciden, es posible que se hayan actualizado incorrectamente. Usa generate_password_hash para configurar una nueva contraseña y asegúrate de usar check_password_hash al validar.
+
+Logs de Replit
+Revisa los logs en la consola de Replit. Si hay algún error relacionado con la base de datos o la lógica del administrador, lo verás ahí.
+
+5. Crear un Nuevo Administrador desde Cero
+Si todo falla, crea un nuevo administrador directamente desde el código:
+
+Ruta Directa para Crear un Administrador
+python
+Copiar código
+@app.route('/create-admin')
+def create_admin():
+    hashed_password = generate_password_hash("admin123", method='sha256')
+    admin = User(email="admin@example.com", password=hashed_password, is_admin=True, is_verified=True)
+    db.session.add(admin)
+    db.session.commit()
+    return "Administrador creado exitosamente."
+Accede a /create-admin y usa:
+
+Email: admin@example.com
+Contraseña: admin123
+Intenta acceder al panel con estos datos.
+
+Resumen de los Pasos
+Usa la ruta /list-users para verificar qué usuarios existen y sus roles.
+Usa /setup_admin para actualizar el rol de administrador de info@emovir.com o globalrealestatebusiness@gmail.com.
+Si no puedes acceder con los usuarios existentes, crea un nuevo administrador con /create-admin.
+Revisa los logs de Replit para detectar errores en tiempo real.

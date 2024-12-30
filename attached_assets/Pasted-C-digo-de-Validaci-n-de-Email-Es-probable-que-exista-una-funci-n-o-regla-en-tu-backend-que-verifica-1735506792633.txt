@@ -1,0 +1,52 @@
+Código de Validación de Email
+
+Es probable que exista una función o regla en tu backend que verifica el dominio del correo electrónico al registrarse. Debemos revisar esa lógica.
+El patrón típico sería algo como esto:
+python
+Copiar código
+ALLOWED_DOMAINS = ["urgencias-ia.com", "hotmail.com", "gmail.com", "emovir.com", "app.urgencias-ia.com"]
+
+def is_valid_email(email):
+    domain = email.split('@')[-1]
+    return domain in ALLOWED_DOMAINS
+Error al Registrar Usuario
+
+Si el dominio del correo no está en la lista permitida, el sistema muestra el mensaje de error que mencionas.
+Solución
+Ampliar la Lista de Dominios Permitidos
+
+Si los dominios aceptados deben ser ampliados, encuentra dónde está definida la lista (ALLOWED_DOMAINS) y actualízala.
+
+Por ejemplo, para agregar nuevos dominios:
+
+python
+Copiar código
+ALLOWED_DOMAINS = ["urgencias-ia.com", "hotmail.com", "gmail.com", "emovir.com", "app.urgencias-ia.com", "nuevo-dominio.com"]
+Modificar la Validación del Dominio
+
+Si quieres permitir cualquier dominio válido, puedes relajar la validación quitando la lista de dominios permitidos:
+python
+Copiar código
+import re
+
+def is_valid_email(email):
+    # Validación básica para asegurar que el correo tiene formato válido
+    pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+    return re.match(pattern, email)
+Actualizar el Mensaje de Error
+
+Si decides mantener la validación de dominios específicos, actualiza el mensaje de error para que sea más claro. Por ejemplo:
+python
+Copiar código
+return "Por favor, utilice un correo con uno de los siguientes dominios: " + ", ".join(ALLOWED_DOMAINS)
+Pasos para Implementar
+Encuentra Dónde se Valida el Email
+
+Busca en el código funciones relacionadas con el registro de usuarios, como validate_email, is_valid_email, o en la lógica del formulario de registro.
+Haz Cambios Según tu Necesidad
+
+O bien amplía la lista de dominios permitidos.
+O bien elimina la restricción para aceptar cualquier dominio válido.
+Prueba los Cambios
+
+Intenta registrar usuarios con diferentes correos para asegurarte de que el sistema ahora funcione correctamente.

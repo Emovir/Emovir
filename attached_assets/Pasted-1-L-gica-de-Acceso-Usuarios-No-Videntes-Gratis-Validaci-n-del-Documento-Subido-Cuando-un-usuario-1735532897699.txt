@@ -1,0 +1,85 @@
+1. Lógica de Acceso
+Usuarios No Videntes: Gratis
+Validación del Documento Subido:
+
+Cuando un usuario suba su documento, asegúrate de que este sea validado y que el campo is_verified en la base de datos se actualice:
+python
+Copiar código
+class User(db.Model):
+    # ...
+    is_visually_impaired = db.Column(db.Boolean, default=False)  # Indica si es invidente
+    disability_document_path = db.Column(db.String(200), nullable=True)  # Documento subido
+    disability_verified = db.Column(db.Boolean, default=False)  # Verificado
+Ruta para Verificar Documentos:
+
+En el panel de administrador, agrega una ruta para que puedas verificar los documentos subidos y aprobarlos:
+python
+Copiar código
+@app.route('/admin/verify-disability/<int:user_id>', methods=['POST'])
+def verify_disability(user_id):
+    user = User.query.get(user_id)
+    if not user:
+        return {"message": "Usuario no encontrado."}, 404
+
+    user.disability_verified = True
+    db.session.commit()
+    return {"message": "Usuario verificado como no vidente."}
+Acceso Automático:
+
+Si el campo disability_verified es True, el usuario tiene acceso completo sin pago.
+Usuarios de Pago: 1 Euro al Mes
+Integración del Pago:
+
+Una vez que el usuario realiza el pago, actualiza el campo is_paid en la base de datos:
+python
+Copiar código
+class User(db.Model):
+    # ...
+    is_paid = db.Column(db.Boolean, default=False)  # Pago completado
+Ruta para Confirmar el Pago:
+
+Implementa una ruta que se active cuando el sistema de pago confirme el éxito del pago:
+python
+Copiar código
+@app.route('/confirm-payment/<int:user_id>', methods=['POST'])
+def confirm_payment(user_id):
+    user = User.query.get(user_id)
+    if not user:
+        return {"message": "Usuario no encontrado."}, 404
+
+    user.is_paid = True
+    db.session.commit()
+    return {"message": "Pago confirmado. Acceso habilitado."}
+Acceso Automático:
+
+Si el campo is_paid es True, el usuario tiene acceso completo.
+2. Validación en las Secciones Protegidas
+Asegúrate de que las rutas que requieren acceso verifiquen si el usuario cumple con los requisitos:
+
+python
+Copiar código
+from flask import session, redirect, url_for
+
+@app.route('/protected-section')
+def protected_section():
+    user = User.query.get(session['user_id'])  # Obtén el usuario desde la sesión
+    if not (user.is_paid or user.disability_verified):
+        return redirect(url_for('payment_page'))  # Redirige al pago si no cumple requisitos
+    return render_template('protected_section.html')
+3. Funcionalidad Adicional para Administradores
+En el panel de administración:
+
+Filtrar Usuarios por Estado:
+
+Gratis (invidentes) → disability_verified = True.
+Pago → is_paid = True.
+Pendientes de verificación → disability_verified = False.
+Notificaciones de Documentos Subidos:
+
+Recibe alertas o muestra un listado con los usuarios que han subido documentos pendientes de verificación.
+4. Pruebas
+Usuarios No Videntes:
+Sube un documento, verifica como administrador, y confirma que el usuario tiene acceso.
+Usuarios de Pago:
+Realiza un pago de prueba y verifica que el usuario tiene acceso después de la confirmación.
+¿Te parece claro o necesitas más detalles en alguna parte? ¡Vamos afinando todo! 😊

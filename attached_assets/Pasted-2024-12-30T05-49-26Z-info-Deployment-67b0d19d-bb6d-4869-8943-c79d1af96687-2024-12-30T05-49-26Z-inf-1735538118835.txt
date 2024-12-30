@@ -1,0 +1,52 @@
+2024-12-30T05:49:26Z info: Deployment: 67b0d19d-bb6d-4869-8943-c79d1af96687
+2024-12-30T05:49:26Z info: Build: a9a6c090-ff00-4942-a333-2f8ad4f42a4e
+2024-12-30T05:49:26Z info: Connecting to builder
+2024-12-30T05:49:29Z info: Builder connected
+2024-12-30T05:49:30Z info: Installing packages
+2024-12-30T05:49:30Z info: Skipping Build as no Build command set
+2024-12-30T05:49:30Z info: Pushing pid1 binary layer...
+2024-12-30T05:49:32Z info: Pushing Repl layer...
+2024-12-30T05:49:32Z info: Pushing hosting layer...
+2024-12-30T05:49:32Z info: Nix layers for this Repl are uncached.
+2024-12-30T05:49:32Z info: Pushing nix-0 layer...
+2024-12-30T05:49:32Z info: Created hosting layer
+2024-12-30T05:49:32Z info: Created pid1 binary layer
+2024-12-30T05:49:30Z info: Pushing pid1 binary layer...
+2024-12-30T05:49:32Z info: Pushing Repl layer...
+2024-12-30T05:49:32Z info: Pushing hosting layer...
+2024-12-30T05:49:32Z info: Nix layers for this Repl are uncached.
+2024-12-30T05:49:32Z info: Pushing nix-0 layer...
+2024-12-30T05:49:32Z info: Created hosting layer
+2024-12-30T05:49:32Z info: Created pid1 binary layer
+2024-12-30T05:49:51Z info: Created Repl layer
+2024-12-30T05:49:53Z info: Created Repl (cache) layer
+2024-12-30T05:50:23Z info: pushed cache image manifest
+2024-12-30T05:50:25Z info: Pushed soci index manifest
+2024-12-30T05:52:05Z info: Creating Autoscale service
+Traceback (most recent call last):
+forwarding local port 5000 to external port 80
+DEBUG:extensions:Inicializando extensión SQLAlchemy...
+DEBUG:extensions:Inicializando extensión Flask-Migrate...
+INFO:extensions:Extensión Mail inicializada correctamente
+DEBUG:extensions:Inicializando extensión SQLAlchemy...
+Traceback (most recent call last):
+DEBUG:extensions:Inicializando extensión SQLAlchemy...
+INFO:extensions:Extensión Login Manager inicializada correctamente
+DEBUG:extensions:Inicializando extensión Mail...
+NameError: name 'admin_required' is not defined. Did you mean: 'login_required'?
+DEBUG:extensions:Mail Username configurado: Sí
+INFO:extensions:Extensión Mail inicializada correctamente
+NameError: name 'admin_required' is not defined. Did you mean: 'login_required'?
+INFO:extensions:Extensión Mail inicializada correctamente
+     ^^^^^^^^^^^^^^
+command finished with error [python main.py]: exit status 1
+INFO:extensions:Extensión SQLAlchemy inicializada correctamente
+     ^^^^^^^^^^^^^^
+command finished with error [python main.py]: exit status 1
+INFO:extensions:Database tables created successfully
+INFO:extensions:Extensión Flask-Migrate inicializada correctamente
+NameError: name 'admin_required' is not defined. Did you mean: 'login_required'?
+DEBUG:extensions:Mail Port: 587
+DEBUG:extensions:Inicializando extensión Flask-Migrate...
+crash loop detected
+2024-12-30T05:54:44Z error: The deployment is crash looping. This can happen if the run command fails or exits immediately after starting. Check the logs for more information.

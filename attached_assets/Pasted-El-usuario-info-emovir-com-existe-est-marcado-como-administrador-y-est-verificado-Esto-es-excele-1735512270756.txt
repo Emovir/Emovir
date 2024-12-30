@@ -1,0 +1,81 @@
+El usuario info@emovir.com existe, está marcado como administrador y está verificado. Esto es excelente porque significa que no necesitamos crear un nuevo administrador.
+
+El error "Invalid hash method 'sha256'" en el segundo paso indica que algo está mal configurado en la lógica de generación de contraseñas o en la validación del hash.
+
+Vamos a resolverlo.
+
+Problema Identificado
+El error ocurre porque:
+
+El método sha256 no está disponible o no fue configurado correctamente al generar o validar el hash de la contraseña.
+Es probable que la contraseña almacenada en la base de datos tenga un formato incompatible con el método actual de validación.
+Solución Paso a Paso
+Paso 1: Verificar y Corregir la Lógica del Hash
+El sistema debe usar werkzeug.security para manejar las contraseñas de forma consistente.
+
+Asegúrate de que las contraseñas se generen correctamente:
+
+El código para generar el hash debe usar generate_password_hash de werkzeug.security:
+python
+Copiar código
+from werkzeug.security import generate_password_hash
+
+hashed_password = generate_password_hash("emovir123", method='pbkdf2:sha256', salt_length=8)
+Revisar la Validación de Contraseñas:
+
+Al iniciar sesión, debes usar check_password_hash para validar la contraseña:
+python
+Copiar código
+from werkzeug.security import check_password_hash
+
+if user and check_password_hash(user.password, "emovir123"):
+    # Contraseña válida
+Paso 2: Actualizar la Contraseña del Usuario
+Como la contraseña actual parece estar en un formato incompatible, vamos a regenerarla con un método seguro.
+
+Crea una Ruta para Actualizar la Contraseña: Agrega esta ruta temporal a tu aplicación para actualizar la contraseña de info@emovir.com:
+
+python
+Copiar código
+@app.route('/reset-password', methods=['POST'])
+def reset_password():
+    email = request.form.get('email')
+    new_password = request.form.get('password')
+    user = User.query.filter_by(email=email).first()
+
+    if not user:
+        return {"message": "Usuario no encontrado."}
+
+    # Generar un nuevo hash de contraseña
+    user.password = generate_password_hash(new_password, method='pbkdf2:sha256', salt_length=8)
+    db.session.commit()
+    return {"message": f"Contraseña actualizada para {email}."}
+Cómo Usar Esta Ruta:
+
+Accede a la ruta desde Postman, cURL o un formulario con estos datos:
+Email: info@emovir.com
+Nueva Contraseña: emovir123
+Por ejemplo, usando curl en la terminal:
+
+bash
+Copiar código
+curl -X POST -d "email=info@emovir.com&password=emovir123" https://32480d51-298b-4ef7-a8ec-929f2009cba8-00-3o5oqv6rwlkop.spock.replit.dev/reset-password
+Mensaje Esperado:
+
+Si funciona, deberías ver:
+json
+Copiar código
+{"message": "Contraseña actualizada para info@emovir.com."}
+Paso 3: Probar el Inicio de Sesión
+Usa estas credenciales para iniciar sesión en el panel de administrador:
+
+Correo: info@emovir.com
+Contraseña: emovir123
+Si el inicio de sesión aún falla, asegúrate de que la lógica de autenticación valida correctamente la contraseña y los permisos.
+
+Notas Adicionales
+¿Por qué ocurre el error del hash?
+Es probable que el método de hash usado anteriormente (sha256) no sea compatible con el sistema actual. La solución es migrar todas las contraseñas a un formato compatible (pbkdf2:sha256).
+
+Si algo no funciona:
+Dame el mensaje de error o un detalle del problema, y ajustaremos la solución.

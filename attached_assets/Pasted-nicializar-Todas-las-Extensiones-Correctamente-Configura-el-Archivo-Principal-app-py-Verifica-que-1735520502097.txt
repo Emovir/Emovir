@@ -1,0 +1,72 @@
+nicializar Todas las Extensiones Correctamente
+Configura el Archivo Principal (app.py):
+Verifica que las extensiones estén correctamente inicializadas después de configurar Flask:
+python
+Copiar código
+from flask import Flask
+from flask_sqlalchemy import SQLAlchemy
+from flask_mail import Mail
+
+db = SQLAlchemy()
+mail = Mail()
+
+def create_app():
+    app = Flask(__name__)
+
+    # Configuración de la aplicación
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///app.db'
+    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+    app.config['MAIL_SERVER'] = 'smtp.gmail.com'
+    app.config['MAIL_PORT'] = 587
+    app.config['MAIL_USE_TLS'] = True
+    app.config['MAIL_USE_SSL'] = False
+    app.config['MAIL_USERNAME'] = 'tu_correo@gmail.com'
+    app.config['MAIL_PASSWORD'] = 'tu_contraseña_de_aplicación'
+    app.config['MAIL_DEFAULT_SENDER'] = 'tu_correo@gmail.com'
+
+    # Inicializar extensiones
+    db.init_app(app)
+    mail.init_app(app)
+
+    return app
+Consejo 2: Verifica la Conexión con el Servidor de Correo
+Prueba Enviar un Correo desde Flask:
+
+Crea una ruta para enviar un correo de prueba:
+python
+Copiar código
+from flask_mail import Message
+
+@app.route('/send-test-email')
+def send_test_email():
+    try:
+        msg = Message("Correo de Prueba",
+                      sender=app.config['MAIL_DEFAULT_SENDER'],
+                      recipients=["destinatario@ejemplo.com"])
+        msg.body = "¡Hola! Este es un correo de prueba enviado desde Flask."
+        mail.send(msg)
+        return "Correo enviado con éxito."
+    except Exception as e:
+        return f"Error al enviar el correo: {str(e)}"
+Prueba la Ruta:
+
+Accede a:
+perl
+Copiar código
+https://<tu-repl-url>.repl.co/send-test-email
+Si aparece un error, revisa los logs en Replit para entender el problema.
+Consejo 3: Maneja Errores en la Configuración del Correo
+Errores Comunes del Correo:
+
+[Errno -2] Name or service not known: Problema con el servidor SMTP o con la red.
+Authentication Error: Las credenciales no son correctas.
+Cómo Resolver:
+
+Asegúrate de que el servidor de correo es accesible desde Replit:
+Usa smtp.gmail.com para Gmail.
+Usa MAIL_PORT=587 para conexiones seguras con TLS.
+Si estás usando Gmail, activa las Contraseñas de Aplicación en la configuración de seguridad de tu cuenta.
+Consejo 4: Reinicia el Servidor
+Después de realizar cambios, reinicia el servidor:
+
+Haz clic en Run en Replit para asegurarte de que todo se aplique correctamente.

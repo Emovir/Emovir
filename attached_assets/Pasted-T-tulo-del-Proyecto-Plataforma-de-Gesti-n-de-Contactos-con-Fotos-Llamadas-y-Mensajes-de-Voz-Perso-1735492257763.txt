@@ -1,0 +1,73 @@
+Título del Proyecto:
+"Plataforma de Gestión de Contactos con Fotos, Llamadas y Mensajes de Voz Personalizados"
+
+Descripción Inicial del Proyecto:
+Necesito ayuda para configurar la infraestructura básica de un proyecto en Replit. El objetivo principal es desarrollar una plataforma que permita:
+
+Gestionar contactos (nombre, foto, teléfono, mensaje asociado).
+Realizar llamadas directamente desde el móvil del usuario al hacer clic en un contacto.
+Asociar un mensaje de voz personalizado a cada contacto, que pueda reproducirse al hacer clic en su foto.
+Tareas Iniciales a Realizar
+Configurar el Entorno de Desarrollo:
+
+Framework: Flask (Python) para el backend.
+Base de Datos: PostgreSQL para almacenar usuarios, contactos, y mensajes de voz.
+Dependencias Básicas: Instalar paquetes necesarios (Flask, Flask-SQLAlchemy, Flask-Migrate, gTTS para la generación de voz, etc.).
+Crear la Base de Datos y Modelos:
+
+Modelo para usuarios con campos: id, nombre, email, contraseña.
+Modelo para contactos con campos: id, usuario_id, nombre, teléfono, foto, mensaje.
+Ejemplo del Modelo en Python:
+
+python
+Copiar código
+from flask_sqlalchemy import SQLAlchemy
+db = SQLAlchemy()
+
+class User(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    email = db.Column(db.String(100), unique=True, nullable=False)
+    password = db.Column(db.String(100), nullable=False)
+
+class Contact(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    name = db.Column(db.String(100), nullable=False)
+    phone = db.Column(db.String(20), nullable=False)
+    photo_path = db.Column(db.String(200), nullable=True)
+    message = db.Column(db.Text, nullable=True)
+Configurar Rutas Básicas:
+Ruta para el registro de usuarios (/register).
+Ruta para inicio de sesión (/login).
+Ruta para agregar contactos con fotos y mensajes asociados (/add_contact).
+Ruta para generar y reproducir mensajes de voz (/play_message/<contact_id>).
+Ejemplo para Generar y Reproducir Mensajes de Voz:
+Utilizaremos gTTS para generar un archivo MP3 con el mensaje personalizado asociado a cada contacto.
+
+python
+Copiar código
+from gtts import gTTS
+
+@app.route('/play_message/<int:contact_id>')
+def play_message(contact_id):
+    contact = Contact.query.get(contact_id)
+    if contact.message:
+        tts = gTTS(contact.message, lang='es')
+        file_path = f"static/audio/message_{contact_id}.mp3"
+        tts.save(file_path)
+        return redirect(url_for('static', filename=f"audio/message_{contact_id}.mp3"))
+    return "No hay mensaje asociado a este contacto."
+Prueba Inicial del Sistema:
+Validar que los contactos pueden registrarse en la base de datos.
+Comprobar que al hacer clic en la foto de un contacto, el mensaje personalizado se genera y puede reproducirse.
+Resultado Esperado del Primer Paso
+Un entorno funcional con:
+
+Backend Flask configurado.
+Base de datos PostgreSQL con tablas para usuarios y contactos.
+Ruta para generar mensajes de voz con gTTS y reproducirlos.
+Validación de funcionalidades básicas:
+
+Registrar contactos con nombre, teléfono, foto y mensaje personalizado.
+Reproducir un mensaje de voz asociado a cada contacto al hacer clic en su foto.

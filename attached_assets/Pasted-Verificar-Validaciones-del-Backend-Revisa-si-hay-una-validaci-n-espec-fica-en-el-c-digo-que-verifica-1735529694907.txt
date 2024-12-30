@@ -1,0 +1,57 @@
+Verificar Validaciones del Backend
+Revisa si hay una validación específica en el código que verifica la estructura del correo o los dominios permitidos.
+
+Ejemplo Común de Validación en Backend
+Busca algo como esto en tu código Flask:
+
+python
+Copiar código
+from flask import request
+import re
+
+def is_valid_email(email):
+    regex = r'^\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
+    return re.match(regex, email)
+
+@app.route('/register', methods=['POST'])
+def register():
+    email = request.form.get('email')
+    if not is_valid_email(email):
+        return {"message": "Por favor, ingrese un correo electrónico válido."}, 400
+    # Lógica de registro
+Solución: Eliminar o Ajustar la Validación
+Si existe esta lógica, puedes ajustarla para que acepte cualquier correo eliminando las restricciones adicionales:
+
+python
+Copiar código
+def is_valid_email(email):
+    # Acepta cualquier correo con un formato básico
+    return '@' in email
+2. Verificar Validaciones en el Frontend
+Si tienes un formulario HTML o Jinja2 con validación, busca atributos como pattern o type="email". Por ejemplo:
+
+html
+Copiar código
+<input type="email" name="email" required>
+Solución: Permitir Cualquier Formato
+Cambia type="email" a type="text" o elimina cualquier patrón de validación:
+
+html
+Copiar código
+<input type="text" name="email" required>
+3. Depurar los Logs
+Si no identificas el problema visualmente en el código:
+
+Activa Logs Detallados: Agrega un log para verificar qué datos está recibiendo el servidor:
+python
+Copiar código
+@app.route('/register', methods=['POST'])
+def register():
+    email = request.form.get('email')
+    print(f"Email recibido: {email}")
+    # Resto del código
+Revisa la Consola de Replit: Asegúrate de que el correo está llegando correctamente desde el formulario.
+Prueba Nuevamente
+Reinicia el servidor Flask después de cualquier cambio.
+Intenta registrar un correo con dominios personalizados.
+Si el mensaje persiste, verifica si algún middleware o capa externa (como un proxy) está bloqueando los correos.

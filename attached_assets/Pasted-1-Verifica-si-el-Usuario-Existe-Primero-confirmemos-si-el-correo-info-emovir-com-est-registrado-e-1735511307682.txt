@@ -1,0 +1,108 @@
+1. Verifica si el Usuario Existe
+Primero, confirmemos si el correo info@emovir.com está registrado en la base de datos. Puedes usar una ruta temporal para listar los usuarios:
+
+python
+Copiar código
+@app.route('/check-user/<email>')
+def check_user(email):
+    user = User.query.filter_by(email=email).first()
+    if user:
+        return {
+            "email": user.email,
+            "is_admin": user.is_admin,
+            "is_verified": user.is_verified
+        }
+    else:
+        return "El usuario no existe."
+Accede a esta ruta desde tu navegador con info@emovir.com, por ejemplo:
+perl
+Copiar código
+https://<tu-replit-url>/check-user/info@emovir.com
+Resultado esperado:
+
+Si el usuario existe, deberías ver algo como:
+json
+Copiar código
+{
+  "email": "info@emovir.com",
+  "is_admin": true,
+  "is_verified": true
+}
+Si el usuario no existe, sigue al Paso 2 para crear o registrar la cuenta.
+2. Crear o Actualizar el Usuario como Administrador
+Si el usuario info@emovir.com no existe o no tiene permisos de administrador, usa esta ruta para crearlo o actualizarlo:
+
+python
+Copiar código
+@app.route('/setup-admin', methods=['POST'])
+def setup_admin():
+    email = request.form.get('email')
+    password = request.form.get('password')  # Contraseña que quieres usar
+    user = User.query.filter_by(email=email).first()
+
+    if user:
+        # Actualiza al usuario existente
+        user.is_admin = True
+        user.password = generate_password_hash(password, method='sha256')
+        db.session.commit()
+        return f"Usuario {email} actualizado como administrador."
+    else:
+        # Crea un nuevo usuario administrador
+        hashed_password = generate_password_hash(password, method='sha256')
+        admin = User(email=email, password=hashed_password, is_admin=True, is_verified=True)
+        db.session.add(admin)
+        db.session.commit()
+        return f"Administrador {email} creado exitosamente."
+Cómo Usar Esta Ruta
+Abre un cliente como Postman o cURL, o crea un formulario temporal para enviar los datos.
+Proporciona los siguientes valores:
+Email: info@emovir.com
+Contraseña: emovir123
+Validación
+Después de ejecutar esta ruta, el usuario debería estar registrado o actualizado con los permisos correctos. Verifica nuevamente usando la ruta /check-user/<email>.
+
+3. Confirmar la Contraseña
+Si el usuario existe pero la contraseña sigue siendo inválida, puede ser un problema de hash. Flask utiliza werkzeug.security para manejar las contraseñas, por lo que debes asegurarte de que:
+
+Almacenas la Contraseña como un Hash:
+Usa generate_password_hash al guardar contraseñas.
+Validas Correctamente con check_password_hash:
+La lógica de inicio de sesión debe incluir algo como:
+python
+Copiar código
+from werkzeug.security import check_password_hash
+
+user = User.query.filter_by(email=email).first()
+if user and check_password_hash(user.password, password):
+    # Contraseña válida
+    session['admin_id'] = user.id
+    return redirect('/admin-dashboard')
+4. Crear un Administrador Nuevo Desde Cero
+Si todo lo anterior falla, crea un nuevo administrador directamente desde el código:
+
+python
+Copiar código
+@app.route('/create-admin')
+def create_admin():
+    hashed_password = generate_password_hash("admin123", method='sha256')
+    admin = User(email="info@emovir.com", password=hashed_password, is_admin=True, is_verified=True)
+    db.session.add(admin)
+    db.session.commit()
+    return "Administrador creado exitosamente."
+Contraseña predeterminada: admin123.
+Intenta iniciar sesión con:
+
+Email: info@emovir.com
+Contraseña: admin123.
+5. Revisa los Logs para Más Detalles
+Replit genera logs en tiempo real. Revisa los logs para identificar exactamente dónde está fallando la lógica de inicio de sesión. Busca mensajes como:
+
+"Usuario no encontrado"
+"Contraseña inválida"
+Si el problema persiste, comparte los detalles que encuentres en los logs y ajustaremos el enfoque.
+
+Resumen de Soluciones
+Verifica si info@emovir.com existe con la ruta /check-user/<email>.
+Usa /setup-admin para crear o actualizar al usuario como administrador con la contraseña emovir123.
+Si todo falla, crea un nuevo administrador con /create-admin.
+Revisa los logs de Replit para identificar cualquier otro problema.

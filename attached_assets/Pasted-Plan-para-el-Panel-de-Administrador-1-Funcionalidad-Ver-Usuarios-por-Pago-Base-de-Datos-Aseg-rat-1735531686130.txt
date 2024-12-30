@@ -1,0 +1,109 @@
+Plan para el Panel de Administrador
+1. Funcionalidad: Ver Usuarios por Pago
+Base de Datos:
+
+Asegúrate de que en tu modelo de usuario (User) exista un campo para diferenciar usuarios que han pagado.
+python
+Copiar código
+class User(db.Model):
+    __tablename__ = 'users'
+    id = db.Column(db.Integer, primary_key=True)
+    email = db.Column(db.String(100), unique=True, nullable=False)
+    is_paid = db.Column(db.Boolean, default=False)  # Usuario ha pagado o no
+    # Otros campos...
+Ruta en el Backend:
+
+Agrega una ruta para listar los usuarios que han pagado:
+python
+Copiar código
+@app.route('/admin/paid-users', methods=['GET'])
+def get_paid_users():
+    paid_users = User.query.filter_by(is_paid=True).all()
+    return render_template('paid_users.html', users=paid_users)
+Plantilla HTML para la Visualización:
+
+Crea un archivo templates/paid_users.html para mostrar los usuarios:
+html
+Copiar código
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Usuarios con Pago</title>
+</head>
+<body>
+    <h1>Usuarios que han Pagado</h1>
+    <table border="1">
+        <tr>
+            <th>ID</th>
+            <th>Email</th>
+            <th>Nombre</th>
+        </tr>
+        {% for user in users %}
+        <tr>
+            <td>{{ user.id }}</td>
+            <td>{{ user.email }}</td>
+            <td>{{ user.name }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>
+2. Funcionalidad: Ver Usuarios Videntes/No Videntes
+Base de Datos:
+
+Asegúrate de tener un campo que identifique si el usuario es vidente o no:
+python
+Copiar código
+class User(db.Model):
+    __tablename__ = 'users'
+    is_visually_impaired = db.Column(db.Boolean, default=False)  # Usuario no vidente
+Ruta en el Backend:
+
+Agrega una ruta para listar a los usuarios videntes y no videntes:
+python
+Copiar código
+@app.route('/admin/visually-impaired', methods=['GET'])
+def get_visually_impaired_users():
+    visually_impaired_users = User.query.filter_by(is_visually_impaired=True).all()
+    return render_template('visually_impaired_users.html', users=visually_impaired_users)
+Plantilla HTML para la Visualización:
+
+Crea un archivo templates/visually_impaired_users.html:
+html
+Copiar código
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Usuarios No Videntes</title>
+</head>
+<body>
+    <h1>Usuarios No Videntes</h1>
+    <table border="1">
+        <tr>
+            <th>ID</th>
+            <th>Email</th>
+            <th>Nombre</th>
+        </tr>
+        {% for user in users %}
+        <tr>
+            <td>{{ user.id }}</td>
+            <td>{{ user.email }}</td>
+            <td>{{ user.name }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>
+Opciones Adicionales para el Panel
+Panel Resumido con Filtros:
+
+Unifica las rutas anteriores en una sola página del panel con filtros para ver usuarios por pago o por accesibilidad.
+Acciones Directas desde el Panel:
+
+Habilita botones para:
+Cambiar el estado de pago de un usuario.
+Cambiar el estado de visibilidad (vidente/no vidente).
+Esto se puede lograr con rutas tipo POST/PUT para actualizar los datos desde la misma interfaz.
+Registros de Actividad:
+
+Agrega un registro de quién accedió al panel y qué cambios realizó.

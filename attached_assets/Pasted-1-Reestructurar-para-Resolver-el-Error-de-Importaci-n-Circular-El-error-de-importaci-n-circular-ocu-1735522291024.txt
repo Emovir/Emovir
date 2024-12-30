@@ -1,0 +1,75 @@
+1. Reestructurar para Resolver el Error de Importación Circular
+El error de importación circular ocurre cuando:
+
+app.py importa algo de models.py, y models.py intenta importar algo de app.py, causando un bucle.
+La solución es mover las partes que causan el bucle a un archivo separado. Sigue estos pasos:
+
+Paso 1: Crear un Archivo para Inicializar Extensiones
+Crea un nuevo archivo llamado extensions.py.
+
+Mueve las inicializaciones de las extensiones (db, mail, etc.) a este archivo:
+
+python
+Copiar código
+from flask_sqlalchemy import SQLAlchemy
+from flask_mail import Mail
+
+db = SQLAlchemy()
+mail = Mail()
+Paso 2: Ajustar app.py
+En app.py, importa las extensiones desde extensions.py:
+
+python
+Copiar código
+from flask import Flask
+from extensions import db, mail
+from models import User, Contact  # Ajusta según tus modelos
+
+def create_app():
+    app = Flask(__name__)
+
+    # Configuración de la aplicación
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///app.db'
+    app.config['MAIL_SERVER'] = 'smtp.gmail.com'
+    app.config['MAIL_PORT'] = 587
+    app.config['MAIL_USE_TLS'] = True
+    app.config['MAIL_USE_SSL'] = False
+
+    # Inicializar extensiones
+    db.init_app(app)
+    mail.init_app(app)
+
+    with app.app_context():
+        db.create_all()  # Crear tablas si no existen
+
+    return app
+
+app = create_app()
+Paso 3: Ajustar models.py
+En models.py, importa db desde extensions.py en lugar de app.py:
+
+python
+Copiar código
+from extensions import db
+
+class User(db.Model):
+    __tablename__ = 'users'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    email = db.Column(db.String(100), unique=True, nullable=False)
+    password = db.Column(db.String(100), nullable=False)
+
+class Contact(db.Model):
+    __tablename__ = 'contacts'
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    name = db.Column(db.String(100), nullable=False)
+    phone = db.Column(db.String(20), nullable=False)
+2. Probar los Cambios
+Reinicia el servidor Flask.
+Verifica que no haya errores de importación circular.
+Prueba crear un usuario o contacto en la base de datos para asegurarte de que db funciona correctamente.
+3. Continuar con la Configuración del Correo
+Una vez que confirmemos que el error de importación circular está resuelto, podemos continuar configurando el correo con tus nuevas cuentas.
+
+Avísame cuando hayas aplicado estos cambios y verificaremos el siguiente paso. 😊
